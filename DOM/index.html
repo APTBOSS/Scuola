@@ -3,21 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>To-Do List</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-<body>
-    <div id="div1">
-        <p id="p1">Paragrafo 1</p>
-        <p id="p2">Paragrafo 2</p>
-    </div>
-
-    <button type="button" id="add">Aggiungi</button><br>
-    <button type="button" id="remove">Rimuovi</button><br>
-    <button type="button" id="remove_last_item">Rimuovi l'ultimo paragrafo</button><br>
-    <button type="button" id="remove_chosen_item">Rimuovi il paragrafo a tua scelta tramite l'id</button>
-    <input type="text" id="input_id">
-    
-
-</body>
+    <body>
+        <div class="container">
+            <h1>La mia To-Do List 📝</h1>
+            <form id="todo-form">
+                <input type="text" id="todo-input" placeholder="Aggiungi un nuovo elemento..." required>
+                <button type="submit">Aggiungi</button>
+            </form>
+            <ul id="todo-list"></ul>
+        </div>
+    </body>
 <script src="script.js"></script>
 </html>
