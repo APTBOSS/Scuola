@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Magazzino Unificato - Client/Admin</title>
+    <link rel="stylesheet" href="style.css"> 
+</head>
+<body>
+
+    <header>
+        <h1>🛒 Magazzino & Carrello</h1>
+        <div id="auth-container">
+            <button id="access-admin-btn" onclick="mostraFormPassword()">Accesso Admin</button>
+            <div id="password-form-container" style="display: none;">
+                <input type="password" id="admin-password" placeholder="Inserisci Password">
+                <button onclick="checkPassword()">Invio</button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        
+        <div id="client-view">
+            <div id="magazzino" class="sezione">
+                <h2>📦 Prodotti Disponibili</h2>
+                <div id="lista-prodotti-client">
+                    </div>
+            </div>
+        
+            <div id="riepilogo-carrello" class="sezione">
+                <h2>🛒 Il tuo Carrello</h2>
+                <ul id="carrello-lista"></ul>
+                <div id="totale">
+                    Totale: **€<span id="totale-prezzo">0.00</span>**
+                </div>
+                <button class="checkout-btn">Procedi all'acquisto</button>
+            </div>
+        </div>
+
+
+        <div id="admin-view" style="display: none;">
+            <div id="gestione-prodotti" class="sezione admin-view-content">
+                <div class="admin-header">
+                    <h2>⚙️ Gestione Prodotti (Admin)</h2>
+                    <button class="logout-btn" onclick="logoutAdmin()">Esci da Admin</button>
+                </div>
+                
+                <button class="add-product-btn" onclick="mostraFormAggiunta()">Aggiungi Nuovo Prodotto</button>
+                <div id="lista-prodotti-admin">
+                    </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="script.js"></script>
+
+</body>
+</html>
