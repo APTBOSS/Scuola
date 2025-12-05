@@ -1,5 +1,5 @@
-public class Stack<G> {
-    private Node<G> top;
+public class Stack<T> {
+    private Node<T> top;
     private int size;
 
     public Stack() {
@@ -7,25 +7,25 @@ public class Stack<G> {
         size = 0;
     }
 
-    public void push(G info) {
-        Node<G> nuovo = new Node<>(info);
+    public void push(T info) {
+        Node<T> nuovo = new Node<>(info);
         nuovo.next = top;
         top = nuovo;
         size++;
     }
 
-    public G pop() {
+    public T pop() {
         if (isEmpty()) {
             throw new RuntimeException("Stack vuoto");
         }
 
-        G valore = top.dato;
+        T valore = top.dato;
         top = top.next;
         size--;
         return valore;
     }
 
-    public G peek() {
+    public T peek() {
         if (isEmpty())
             throw new RuntimeException("Stack vuoto");
         return top.dato;
@@ -38,7 +38,7 @@ public class Stack<G> {
     public void print() {
         if (isEmpty())
             throw new RuntimeException("Stack vuoto");
-        Node<G> current = top;
+        Node<T> current = top;
         System.out.println("Cima --> ");
         while (current != null) {
             System.out.println(current.dato + " ");
