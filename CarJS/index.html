@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - Gestione Veicoli</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="card" style="max-width: 400px; margin: 100px auto; text-align: center;">
+        <h1>Accesso Sistema</h1>
+        <p>Seleziona il tuo profilo</p>
+        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+            <button onclick="location.href='frontend/user/index.html'" style="background:#34a853;">AREA USER</button>
+            <button onclick="document.getElementById('admin-box').style.display='block'" style="background:#ea4335;">AREA ADMIN</button>
+        </div>
+
+        <div id="admin-box" style="display:none; border-top: 1px solid #eee; padding-top: 20px;">
+            <label>Password Amministratore:</label>
+            <input type="password" id="pass_input" placeholder="Inserisci password">
+            <button onclick="checkPassword()">VERIFICA E ACCEDI</button>
+        </div>
+    </div>
+
+    <script>
+        async function checkPassword() {
+            const pwd = document.getElementById('pass_input').value;
+            try {
+                const response = await fetch('http://localhost:3000/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: pwd })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    window.location.href = "frontend/admin/index.html";
+                } else {
+                    alert(result.message);
+                }
+            } catch (err) {
+                alert("Errore: il server backend non risponde.");
+            }
+        }
+    </script>
+</body>
+</html>

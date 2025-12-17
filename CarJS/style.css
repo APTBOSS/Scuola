@@ -1,0 +1,85 @@
+/* Stile Generale */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f7f6;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+h1 {
+    color: #2c3e50;
+    margin-bottom: 30px;
+}
+
+/* Contenitore delle sezioni */
+section {
+    background: white;
+    width: 100%;
+    max-width: 500px;
+    margin-bottom: 15px;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+section:hover {
+    transform: translateY(-2px);
+}
+
+/* Testi e Display */
+p {
+    margin-top: 0;
+    font-size: 1.1em;
+    font-weight: 500;
+}
+
+span {
+    color: #e67e22;
+    font-weight: bold;
+    background: #fdf2e9;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+/* Input e Pulsanti */
+input {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 150px;
+    margin-right: 10px;
+}
+
+button {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+}
+
+/* Bottone Mostra (Blu) */
+button[onclick^="show"] {
+    background-color: #3498db;
+    color: white;
+    margin-right: 5px;
+}
+
+button[onclick^="show"]:hover {
+    background-color: #2980b9;
+}
+
+/* Bottone Modifica (Verde) */
+button[onclick^="modifica"], button[onclick^="cambia"] {
+    background-color: #27ae60;
+    color: white;
+}
+
+button[onclick^="modifica"]:hover, button[onclick^="cambia"]:hover {
+    background-color: #219150;
+}

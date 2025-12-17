@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>User - Visualizzazione</title>
+    <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+    <button onclick="location.href='../../index.html'" style="width:auto; background:#666;">← TORNA AL LOGIN</button>
+    <h1>Dati Veicolo Corrente</h1>
+    
+    <div class="card">
+        <p>Targa: <span id="targa">---</span></p>
+        <p>Altezza: <span id="altezza">---</span> cm</p>
+        <p>Lunghezza: <span id="lunghezza">---</span> cm</p>
+        <p>Colore: <span id="colore">---</span></p>
+        <p>Numero Porte: <span id="porte">---</span></p>
+        <button onclick="caricaDati()">AGGIORNA DATI</button>
+    </div>
+
+    <script>
+        async function caricaDati() {
+            const response = await fetch('http://localhost:3000/api/macchina');
+            const car = await response.json();
+            document.getElementById('targa').innerText = car.targa;
+            document.getElementById('altezza').innerText = car.altezza;
+            document.getElementById('lunghezza').innerText = car.lunghezza;
+            document.getElementById('colore').innerText = car.colore;
+            document.getElementById('porte').innerText = car.numero_porte;
+        }
+        window.onload = caricaDati;
+    </script>
+</body>
+</html>

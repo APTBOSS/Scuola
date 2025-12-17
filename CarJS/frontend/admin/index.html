@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Gestione</title>
+    <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+    <button onclick="location.href='../../index.html'" style="width:auto; background:#666;">LOGOUT ←</button>
+    <h1>Pannello di Controllo Admin</h1>
+
+    <div class="card form-container">
+        <label>Targa:</label>
+        <input type="text" id="in_targa">
+        <label>Altezza (cm):</label>
+        <input type="number" id="in_altezza">
+        <label>Lunghezza (cm):</label>
+        <input type="number" id="in_lunghezza">
+        <label>Colore:</label>
+        <input type="text" id="in_colore">
+        <label>Numero Porte:</label>
+        <input type="number" id="in_porte">
+        <hr>
+        <button onclick="salvaDati()">SALVA MODIFICHE</button>
+    </div>
+
+    <script>
+        async function salvaDati() {
+            const payload = {
+                targa: document.getElementById('in_targa').value,
+                altezza: parseInt(document.getElementById('in_altezza').value),
+                lunghezza: parseInt(document.getElementById('in_lunghezza').value),
+                colore: document.getElementById('in_colore').value,
+                numero_porte: parseInt(document.getElementById('in_porte').value)
+            };
+
+            const response = await fetch('http://localhost:3000/api/macchina', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                alert(result.message);
+            } else {
+                alert("ERRORE: " + result.error);
+            }
+        }
+    </script>
+</body>
+</html>
