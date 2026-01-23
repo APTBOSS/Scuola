@@ -5,7 +5,6 @@ public class Lista {
         this.head = null;
     }
 
-    // Metodo helper per aggiungere elementi (utile per testare)
     public void add(int valore) {
         Nodo nuovo = new Nodo(valore);
         if (head == null) {
@@ -19,82 +18,95 @@ public class Lista {
         }
     }
 
-    // --- METODI RICHIESTI ---
-
+    // --- NUOVO METODO: REVERSE ---
     /**
-     * Ritorna la somma dei valori.
+     * Inverte l'ordine dei nodi nella lista.
+     * Modifica fisicamente i puntatori.
      */
-    public int sum() {
-        int totale = 0;
+    public void reverse() {
+        Nodo prev = null;
         Nodo current = head;
+        Nodo next = null;
 
         while (current != null) {
-            totale += current.getInfo(); // Accesso tramite getter
-            current = current.getNext(); // Scorrimento tramite getter
+            next = current.getNext(); // 1. Salva il prossimo nodo
+            current.setNext(prev);    // 2. Inverte il puntatore (punta indietro)
+            prev = current;           // 3. Avanza 'prev'
+            current = next;           // 4. Avanza 'current'
         }
 
-        return totale;
+        // Alla fine, 'prev' sarà la nuova testa della lista
+        head = prev;
     }
 
-    /**
-     * Ritorna la media SENZA usare size().
-     * Calcola somma e conteggio scorrendo la lista una sola volta.
-     */
+    // --- Metodo utile per stampare la lista e vedere il risultato ---
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        Nodo current = head;
+        while (current != null) {
+            sb.append(current.getInfo()).append(" -> ");
+            current = current.getNext();
+        }
+        sb.append("//");
+        return sb.toString();
+    }
+    
+    public int sum() {
+        int somma = 0;
+        Nodo current = head;
+        while (current != null) {
+            somma += current.getInfo();
+            current = current.getNext();
+        }
+        return somma;
+    }
+
+    // -- METODO PER CALCOLARE LA MEDIA DEI NUMERI DELLA LISTA
     public int average() {
         if (head == null) return 0;
-
-        int totale = 0;
+        int somma = 0;
         int count = 0;
         Nodo current = head;
-
         while (current != null) {
-            totale += current.getInfo();
+            somma += current.getInfo();
             count++;
             current = current.getNext();
         }
-
-        return totale / count; // Divisione intera
+        return somma / count;
     }
 
-    /**
-     * Ritorna il valore massimo.
-     */
+    // -- METODO PER TROVARE IL MASSIMO NELLA LISTA
     public int max() {
-        if (head == null) {
-            throw new RuntimeException("Lista vuota: nessun massimo");
-        }
-
-        int massimo = head.getInfo();
+        if (head == null) throw new RuntimeException("Lista vuota");
+        int maxVal = head.getInfo();
         Nodo current = head.getNext();
-
         while (current != null) {
-            if (current.getInfo() > massimo) {
-                massimo = current.getInfo();
-            }
+            if (current.getInfo() > maxVal) maxVal = current.getInfo();
             current = current.getNext();
         }
-
-        return massimo;
+        return maxVal;
     }
 
-    /**
-     * Ritorna il valore minimo.
-     */
+    // --METODO PER TROVARE IL MINIMO NELLA LISTA
     public int min() {
-        if (head == null) {
-            throw new RuntimeException("Lista vuota: nessun minimo");
-        }
-
-        int minimo = head.getInfo();
+        if (head == null) throw new RuntimeException("Lista vuota");
+        int minVal = head.getInfo();
         Nodo current = head.getNext();
-
         while (current != null) {
-            if (current.getInfo() < minimo) {
-                minimo = current.getInfo();
-            }
+            if (current.getInfo() < minVal) minVal = current.getInfo();
             current = current.getNext();
         }
+        return minVal;
+    }
 
-        return minimo;
+    // -- RITORNA GLI ULTIMI DUE ELEMENTI DELLA LISTA
+    public Integer[] lastAndSecondToLast() {
+        if (head == null || head.getNext() == null) return null;
+        Nodo current = head;
+        while (current.getNext().getNext() != null) {
+            current = current.getNext();
+        }
+        return new Integer[]{current.getInfo(), current.getNext().getInfo()};
     }
 }
