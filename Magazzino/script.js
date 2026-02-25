@@ -2,32 +2,7 @@
 // Struttura dei Dati
 // ===================================
 
-let magazzino = [
-    {
-        codice: "A234X",
-        descrizione: "Penna a sfera blu",
-        prezzo: 1.50,
-        disponibile: true
-    },
-    {
-        codice: "B567Y",
-        descrizione: "Quaderno A4 a righe",
-        prezzo: 3.20,
-        disponibile: true
-    },
-    {
-        codice: "C890Z",
-        descrizione: "Evidenziatore giallo",
-        prezzo: 0.99,
-        disponibile: true
-    },
-    {
-        codice: "D123W",
-        descrizione: "Gomma per cancellare",
-        prezzo: 0.75,
-        disponibile: false 
-    }
-];
+let magazzino = [];
 
 let carrello = {};
 let prezzoTotale = 0.00;
@@ -35,7 +10,20 @@ let isAdminView = false;
 const ADMIN_PASSWORD = "admin"; // Password di esempio
 
 // ===================================
-// FUNZIONI PRINCIPALI DI VISTA (AGGIORNATE)
+// FUNZIONI API
+// ===================================
+
+async function carricaProdotti() {
+    const res = await fetch('/api/prodotti');
+    magazzino = await res.json();
+}
+
+function mostraErrore(msg) {
+    alert(msg);
+}
+
+// ===================================
+// FUNZIONI PRINCIPALI DI VISTA
 // ===================================
 
 /**
@@ -67,40 +55,39 @@ function checkPassword() {
 /**
  * Attiva la modalità Admin e aggiorna la vista.
  */
-function loginAdmin() {
+async function loginAdmin() {
     isAdminView = true;
-    
+
     // Nasconde il form di login e il pulsante di accesso
     document.getElementById('password-form-container').style.display = 'none';
 
     // Aggiorna le viste
     document.getElementById('client-view').style.display = 'none';
     document.getElementById('admin-view').style.display = 'flex';
-    visualizzaProdottiAdmin();
+    await visualizzaProdottiAdmin();
 }
 
 /**
  * Disattiva la modalità Admin e torna alla vista Client.
  */
-function logoutAdmin() {
+async function logoutAdmin() {
     isAdminView = false;
 
     // Aggiorna le viste
     document.getElementById('admin-view').style.display = 'none';
     document.getElementById('client-view').style.display = 'flex';
-    
+
     // Mostra di nuovo il pulsante di accesso
     document.getElementById('access-admin-btn').style.display = 'block';
-    
+
     // Pulisce il campo password
-    document.getElementById('admin-password').value = ''; 
-    visualizzaProdottiClient();
+    document.getElementById('admin-password').value = '';
+    await visualizzaProdottiClient();
 }
 
 
 // ===================================
-// LOGICA CLIENT (CARRELLO) 
-// ... (Tutte le funzioni del carrello restano uguali) ...
+// LOGICA CLIENT (CARRELLO)
 // ===================================
 
 function aggiornaCarrelloTotale() {
@@ -117,11 +104,11 @@ function aggiornaCarrelloTotale() {
 
             elencoCarrelloHTML += `<li class="carrello-item">
                 <div class="item-info">
-                    ${articolo.descrizione} (${articolo.codice}) - 
-                    ${quantita} x €${articolo.prezzo.toFixed(2)} = 
+                    ${articolo.descrizione} (${articolo.codice}) -
+                    ${quantita} x €${articolo.prezzo.toFixed(2)} =
                     **€${subtotale.toFixed(2)}**
                 </div>
-                <button class="btn-elimina-carrello" 
+                <button class="btn-elimina-carrello"
                         onclick="rimuoviDaCarrello('${codiceArticolo}')">
                     &#10005; Rimuovi
                 </button>
@@ -130,14 +117,14 @@ function aggiornaCarrelloTotale() {
     }
 
     prezzoTotale = totale;
-    
+
     document.getElementById('carrello-lista').innerHTML = elencoCarrelloHTML;
     document.getElementById('totale-prezzo').textContent = prezzoTotale.toFixed(2);
 }
 
 function rimuoviDaCarrello(codiceArticolo) {
     if (carrello[codiceArticolo]) {
-        carrello[codiceArticolo] -= 1; 
+        carrello[codiceArticolo] -= 1;
 
         if (carrello[codiceArticolo] <= 0) {
             delete carrello[codiceArticolo];
@@ -157,17 +144,18 @@ function aggiungiAlCarrello(codiceArticolo) {
     }
 }
 
-function visualizzaProdottiClient() {
+async function visualizzaProdottiClient() {
+    await carricaProdotti();
     const listaProdottiDiv = document.getElementById('lista-prodotti-client');
     let prodottiHTML = "";
 
     magazzino.forEach(articolo => {
         const statoClasse = articolo.disponibile ? 'disponibile' : 'non-disponibile';
-        
+
         const bottoneCarrello = articolo.disponibile
             ? `<button class="btn-carrello" onclick="aggiungiAlCarrello('${articolo.codice}')">Aggiungi al Carrello</button>`
             : `<button disabled>Non Disponibile</button>`;
-        
+
         prodottiHTML += `<div class="prodotto ${statoClasse}" data-codice="${articolo.codice}">
             <div>
                 <h3>${articolo.descrizione}</h3>
@@ -185,16 +173,16 @@ function visualizzaProdottiClient() {
 
 // ===================================
 // LOGICA ADMIN (MODIFICA PRODOTTI)
-// ... (Tutte le funzioni Admin restano uguali, tranne l'aggiunta del logout) ...
 // ===================================
 
-function visualizzaProdottiAdmin() {
+async function visualizzaProdottiAdmin() {
+    await carricaProdotti();
     const listaProdottiDiv = document.getElementById('lista-prodotti-admin');
     let prodottiHTML = "";
 
     magazzino.forEach(articolo => {
         const statoClasse = articolo.disponibile ? 'disponibile' : 'non-disponibile';
-        
+
         prodottiHTML += `<div class="prodotto ${statoClasse}" data-codice="${articolo.codice}">
             <div>
                 <h3>${articolo.descrizione}</h3>
@@ -233,45 +221,55 @@ function modificaProdotto(codiceArticolo) {
     prodottoDiv.innerHTML = formHTML;
 }
 
-function salvaModifiche(event, oldCodice) {
-    event.preventDefault(); 
+async function salvaModifiche(event, oldCodice) {
+    event.preventDefault();
 
     const form = event.target;
     const formData = new FormData(form);
-    
-    const index = magazzino.findIndex(a => a.codice === oldCodice);
 
-    if (index !== -1) {
-        const nuovoCodice = formData.get('codice');
-        
-        magazzino[index] = {
-            codice: nuovoCodice,
-            descrizione: formData.get('descrizione'),
-            prezzo: parseFloat(formData.get('prezzo')),
-            disponibile: form.elements.disponibile.checked
-        };
-        
-        visualizzaProdottiAdmin();
-        visualizzaProdottiClient(); 
-        aggiornaCarrelloTotale(); 
+    const body = {
+        codice: formData.get('codice'),
+        descrizione: formData.get('descrizione'),
+        prezzo: parseFloat(formData.get('prezzo')),
+        disponibile: form.elements.disponibile.checked
+    };
+
+    const res = await fetch(`/api/prodotti/${encodeURIComponent(oldCodice)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+    });
+
+    if (!res.ok) {
+        const err = await res.json();
+        mostraErrore(err.error || 'Errore durante il salvataggio');
+        return;
     }
+
+    await visualizzaProdottiAdmin();
+    aggiornaCarrelloTotale();
 }
 
-function eliminaProdotto(codiceArticolo) {
+async function eliminaProdotto(codiceArticolo) {
     if (confirm(`Sei sicuro di voler eliminare il prodotto ${codiceArticolo} dal magazzino?`)) {
-        magazzino = magazzino.filter(a => a.codice !== codiceArticolo);
-        
+        const res = await fetch(`/api/prodotti/${encodeURIComponent(codiceArticolo)}`, {
+            method: 'DELETE'
+        });
+
+        if (!res.ok) {
+            const err = await res.json();
+            mostraErrore(err.error || 'Errore durante l\'eliminazione');
+            return;
+        }
+
         delete carrello[codiceArticolo];
 
-        visualizzaProdottiAdmin();
-        visualizzaProdottiClient();
+        await visualizzaProdottiAdmin();
         aggiornaCarrelloTotale();
     }
 }
 
 function mostraFormAggiunta() {
-    const contenitore = document.getElementById('gestione-prodotti');
-    
     if (document.getElementById('add-form')) return;
 
     const formHTML = `
@@ -290,28 +288,32 @@ function mostraFormAggiunta() {
     document.getElementById('lista-prodotti-admin').insertAdjacentHTML('beforebegin', formHTML);
 }
 
-function aggiungiNuovoProdotto(event) {
+async function aggiungiNuovoProdotto(event) {
     event.preventDefault();
     const form = event.target;
     const formData = new FormData(form);
 
-    const nuovoArticolo = {
+    const body = {
         codice: formData.get('codice'),
         descrizione: formData.get('descrizione'),
         prezzo: parseFloat(formData.get('prezzo')),
         disponibile: form.elements.disponibile.checked
     };
 
-    if (magazzino.some(a => a.codice === nuovoArticolo.codice)) {
-        alert("Errore: Codice prodotto già esistente!");
+    const res = await fetch('/api/prodotti', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+    });
+
+    if (!res.ok) {
+        const err = await res.json();
+        mostraErrore(err.error || 'Errore durante l\'aggiunta');
         return;
     }
 
-    magazzino.push(nuovoArticolo);
-    
     form.remove();
-    visualizzaProdottiAdmin();
-    visualizzaProdottiClient();
+    await visualizzaProdottiAdmin();
 }
 
 
@@ -319,9 +321,9 @@ function aggiungiNuovoProdotto(event) {
 // Esecuzione all'avvio della Pagina
 // ===================================
 
-window.onload = function() {
-    visualizzaProdottiClient(); 
+window.onload = async function() {
+    await visualizzaProdottiClient();
     aggiornaCarrelloTotale();
-    document.getElementById('admin-view').style.display = 'none'; 
+    document.getElementById('admin-view').style.display = 'none';
     document.getElementById('client-view').style.display = 'flex';
-};  
+};
