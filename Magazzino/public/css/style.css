@@ -1,0 +1,388 @@
+/* ===================================
+   CSS Custom Properties
+   =================================== */
+:root {
+    --color-primary:  #007bff;
+    --color-success:  #28a745;
+    --color-warning:  #ffc107;
+    --color-danger:   #dc3545;
+    --color-bg:       #f4f7f6;
+    --color-card:     #ffffff;
+    --color-border:   #dee2e6;
+    --color-text:     #333333;
+
+    --shadow-card:    0 2px 10px rgba(0, 0, 0, 0.05);
+    --shadow-hover:   0 6px 18px rgba(0, 0, 0, 0.12);
+
+    --radius-card:    10px;
+    --radius-btn:     5px;
+
+    --transition-fast: 0.2s ease;
+}
+
+/* ===================================
+   Base
+   =================================== */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--color-bg);
+    color: var(--color-text);
+}
+
+/* ===================================
+   Header
+   =================================== */
+header {
+    background-color: var(--color-primary);
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.header-brand {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+}
+
+header h1 {
+    margin: 0;
+}
+
+header button {
+    background-color: var(--color-warning);
+    color: var(--color-text);
+    border: none;
+    padding: 10px 20px;
+    border-radius: var(--radius-btn);
+    cursor: pointer;
+    font-weight: bold;
+}
+
+#auth-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#password-form-container {
+    display: flex;
+    gap: 5px;
+}
+
+#admin-password {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: var(--radius-btn);
+}
+
+/* ===================================
+   Main Layout
+   =================================== */
+main {
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 0 15px;
+}
+
+#client-view, #admin-view {
+    display: flex;
+    gap: 30px;
+}
+
+.sezione {
+    background-color: var(--color-card);
+    padding: 25px;
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+    flex: 1;
+}
+
+#client-view #magazzino         { flex: 2; }
+#client-view #riepilogo-carrello { flex: 1; min-width: 300px; }
+#admin-view .admin-view-content  { flex: 1; }
+
+h2 {
+    border-bottom: 2px solid var(--color-primary);
+    padding-bottom: 10px;
+    margin-top: 0;
+    color: var(--color-primary);
+}
+
+/* ===================================
+   Prodotto Card
+   =================================== */
+.prodotto {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    margin-bottom: 12px;
+    border-radius: 6px;
+    border-left: 5px solid var(--color-primary);
+    background-color: #f9f9ff;
+    transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+}
+
+.prodotto:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-2px);
+}
+
+.non-disponibile {
+    border-left: 5px solid var(--color-border);
+    background-color: #f0f0f0;
+    opacity: 0.7;
+}
+
+.prodotto h3 { margin: 0 0 5px 0; font-size: 1.1em; }
+.prodotto p  { margin: 0; font-size: 0.9em; }
+
+/* ===================================
+   Buttons
+   =================================== */
+button {
+    border: none;
+    padding: 8px 15px;
+    border-radius: var(--radius-btn);
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color var(--transition-fast), transform var(--transition-fast);
+}
+
+button:active  { transform: scale(0.97); }
+button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.azioni { display: flex; gap: 10px; }
+
+.btn-carrello       { background-color: var(--color-success); color: white; }
+.btn-carrello:hover { background-color: #218838; }
+
+.btn-modifica       { background-color: var(--color-warning); color: var(--color-text); }
+.btn-modifica:hover { background-color: #e0a800; }
+
+.btn-elimina        { background-color: var(--color-danger); color: white; }
+.btn-elimina:hover  { background-color: #c82333; }
+
+.add-product-btn {
+    background-color: var(--color-primary);
+    color: white;
+    margin-bottom: 20px;
+}
+.add-product-btn:hover { background-color: #0069d9; }
+
+.logout-btn       { background-color: var(--color-danger); color: white; }
+.logout-btn:hover { background-color: #c82333; }
+
+.checkout-btn {
+    width: 100%;
+    margin-top: 15px;
+    padding: 12px;
+    background-color: var(--color-primary);
+    color: white;
+    font-size: 1em;
+}
+.checkout-btn:hover { background-color: #0069d9; }
+
+/* ===================================
+   Admin Form
+   =================================== */
+.admin-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 15px;
+    background-color: #f0f4ff;
+    border-radius: var(--radius-btn);
+    border: 1px solid #b8caff;
+    margin-bottom: 10px;
+}
+
+.admin-form label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9em;
+}
+
+.admin-form input[type="text"],
+.admin-form input[type="number"] {
+    padding: 5px;
+    border: 1px solid var(--color-border);
+    border-radius: 3px;
+    width: 60%;
+}
+
+.admin-form .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+/* ===================================
+   Carrello
+   =================================== */
+#carrello-lista {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#carrello-lista .carrello-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--color-border);
+    font-size: 0.95em;
+}
+
+.carrello-item .item-info { flex-grow: 1; }
+
+.btn-elimina-carrello {
+    background-color: var(--color-danger);
+    color: white;
+    padding: 5px 10px;
+    font-size: 0.85em;
+    margin-left: 10px;
+    white-space: nowrap;
+}
+.btn-elimina-carrello:hover { background-color: #c82333; }
+
+.cart-empty-msg {
+    text-align: center;
+    color: #999;
+    font-style: italic;
+    padding: 20px 0;
+}
+
+#totale {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 3px double var(--color-primary);
+    text-align: right;
+    font-size: 1.6em;
+    color: var(--color-primary);
+}
+
+/* ===================================
+   Cart Badge
+   =================================== */
+.cart-badge {
+    background-color: var(--color-danger);
+    color: white;
+    font-size: 0.75em;
+    font-weight: bold;
+    padding: 2px 7px;
+    border-radius: 999px;
+    vertical-align: middle;
+    min-width: 20px;
+    text-align: center;
+}
+
+@keyframes badgeBump {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.35); }
+    70%  { transform: scale(0.9); }
+    100% { transform: scale(1); }
+}
+
+.cart-badge.bump {
+    animation: badgeBump 0.4s ease;
+}
+
+/* ===================================
+   Toast Notifications
+   =================================== */
+#toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 9999;
+}
+
+.toast {
+    padding: 12px 20px;
+    border-radius: var(--radius-btn);
+    color: white;
+    font-size: 0.95em;
+    font-weight: bold;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    opacity: 0;
+    transform: translateX(60px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    max-width: 320px;
+}
+
+.toast.toast-visible {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.toast.toast-hide {
+    opacity: 0;
+    transform: translateX(60px);
+}
+
+.toast-success { background-color: var(--color-success); }
+.toast-error   { background-color: var(--color-danger); }
+.toast-warning { background-color: #e67e00; }
+.toast-info    { background-color: var(--color-primary); }
+
+/* ===================================
+   Spinner
+   =================================== */
+.spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 30px 0;
+}
+
+.spinner-ring {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--color-border);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ===================================
+   Responsive
+   =================================== */
+@media (max-width: 768px) {
+    #client-view {
+        flex-direction: column;
+    }
+
+    #client-view #magazzino,
+    #client-view #riepilogo-carrello {
+        flex: unset;
+        min-width: unset;
+    }
+}

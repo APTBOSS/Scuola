@@ -2,13 +2,17 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Magazzino Unificato - Client/Admin</title>
-    <link rel="stylesheet" href="style.css"> 
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
     <header>
-        <h1>🛒 Magazzino & Carrello</h1>
+        <div class="header-brand">
+            <h1>&#128722; Magazzino &amp; Carrello</h1>
+            <span id="cart-badge" class="cart-badge" style="display:none;">0</span>
+        </div>
         <div id="auth-container">
             <button id="access-admin-btn" onclick="mostraFormPassword()">Accesso Admin</button>
             <div id="password-form-container" style="display: none;">
@@ -19,41 +23,49 @@
     </header>
 
     <main>
-        
+
         <div id="client-view">
             <div id="magazzino" class="sezione">
-                <h2>📦 Prodotti Disponibili</h2>
-                <div id="lista-prodotti-client">
-                    </div>
+                <h2>&#128230; Prodotti Disponibili</h2>
+                <div id="lista-prodotti-client"></div>
+                <div id="spinner-client" class="spinner" style="display:none;">
+                    <div class="spinner-ring"></div>
+                </div>
             </div>
-        
+
             <div id="riepilogo-carrello" class="sezione">
-                <h2>🛒 Il tuo Carrello</h2>
+                <h2>&#128722; Il tuo Carrello</h2>
                 <ul id="carrello-lista"></ul>
                 <div id="totale">
-                    Totale: **€<span id="totale-prezzo">0.00</span>**
+                    Totale: <strong>&euro;<span id="totale-prezzo">0.00</span></strong>
                 </div>
                 <button class="checkout-btn">Procedi all'acquisto</button>
             </div>
         </div>
 
-
         <div id="admin-view" style="display: none;">
             <div id="gestione-prodotti" class="sezione admin-view-content">
                 <div class="admin-header">
-                    <h2>⚙️ Gestione Prodotti (Admin)</h2>
+                    <h2>&#9881;&#65039; Gestione Prodotti (Admin)</h2>
                     <button class="logout-btn" onclick="logoutAdmin()">Esci da Admin</button>
                 </div>
-                
+
                 <button class="add-product-btn" onclick="mostraFormAggiunta()">Aggiungi Nuovo Prodotto</button>
-                <div id="lista-prodotti-admin">
-                    </div>
+                <div id="lista-prodotti-admin"></div>
+                <div id="spinner-admin" class="spinner" style="display:none;">
+                    <div class="spinner-ring"></div>
+                </div>
             </div>
         </div>
 
     </main>
 
-    <script src="script.js"></script>
+    <div id="toast-container"></div>
+
+    <script src="js/api.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/admin.js"></script>
+    <script src="js/main.js"></script>
 
 </body>
 </html>

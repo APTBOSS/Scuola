@@ -30,7 +30,7 @@ function rowToProdotto(row) {
 }
 
 app.use(express.json());
-app.use(express.static(__dirname));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // GET /api/prodotti
 app.get('/api/prodotti', (req, res) => {
