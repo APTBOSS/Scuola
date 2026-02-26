@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(start:*)",
+      "Bash(netstat:*)",
+      "Bash(powershell:*)",
+      "Bash(cd:*)",
+      "Bash(sleep 2:*)"
+    ]
+  }
+}
