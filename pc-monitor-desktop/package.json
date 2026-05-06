@@ -1,0 +1,46 @@
+{
+  "name": "pc-monitor-desktop",
+  "version": "1.0.0",
+  "description": "PC Monitor Desktop – Windows Task Manager Clone",
+  "main": "main.js",
+  "author": "ddero",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win --x64"
+  },
+  "devDependencies": {
+    "electron": "^30.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.monitor.pcmonitor.desktop",
+    "productName": "PC Monitor",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "assets/**"
+    ],
+    "extraResources": [
+      {
+        "from": "../pc-monitor/target/pc-monitor-0.0.1-SNAPSHOT.jar",
+        "to": "backend.jar"
+      }
+    ],
+    "win": {
+      "target": [
+        { "target": "nsis", "arch": ["x64"] }
+      ],
+      "icon": "assets/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "PC Monitor"
+    }
+  }
+}

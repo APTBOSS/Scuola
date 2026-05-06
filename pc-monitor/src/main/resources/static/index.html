@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="it" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PC Monitor</title>
+  <meta name="description" content="Dashboard locale per il monitoraggio delle risorse di sistema (CPU, RAM, Disco)"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg:        #0d1117;
+      --surface:   #161b22;
+      --border:    #30363d;
+      --text:      #e6edf3;
+      --subtext:   #8b949e;
+      --accent:    #58a6ff;
+      --green:     #3fb950;
+      --yellow:    #d29922;
+      --red:       #f85149;
+      --cpu-color: #58a6ff;
+      --ram-color: #3fb950;
+      --disk-color:#d29922;
+      --radius:    12px;
+      --shadow:    0 4px 24px rgba(0,0,0,.4);
+    }
+    [data-theme="light"] {
+      --bg:      #f0f2f5;
+      --surface: #ffffff;
+      --border:  #d0d7de;
+      --text:    #1f2328;
+      --subtext: #656d76;
+      --shadow:  0 4px 24px rgba(0,0,0,.12);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      transition: background .3s, color .3s;
+    }
+
+    /* ── Header ── */
+    header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 28px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .logo { display: flex; align-items: center; gap: 10px; }
+    .logo svg { width: 28px; height: 28px; }
+    .logo h1 { font-size: 1.1rem; font-weight: 700; letter-spacing: -.3px; }
+    .header-right { display: flex; align-items: center; gap: 16px; }
+    #status-dot {
+      width: 9px; height: 9px; border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.4} }
+    #last-update { font-size: .75rem; color: var(--subtext); font-family:'JetBrains Mono',monospace; }
+
+    /* Theme toggle */
+    #theme-btn {
+      background: none; border: 1px solid var(--border);
+      border-radius: 8px; padding: 6px 10px; cursor: pointer;
+      color: var(--text); font-size: 1rem; transition: background .2s;
+    }
+    #theme-btn:hover { background: var(--border); }
+
+    /* ── Main layout ── */
+    main { max-width: 1400px; margin: 0 auto; padding: 24px 20px; }
+
+    /* ── Gauge widgets ── */
+    .gauges {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px; margin-bottom: 24px;
+    }
+    .widget {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      box-shadow: var(--shadow);
+      transition: transform .2s;
+    }
+    .widget:hover { transform: translateY(-2px); }
+    .widget-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .widget-label { font-size: .8rem; font-weight: 600; text-transform: uppercase; letter-spacing: .8px; color: var(--subtext); }
+    .widget-icon { font-size: 1.3rem; }
+    .widget-value {
+      font-size: 2.6rem; font-weight: 700; line-height: 1;
+      font-family: 'JetBrains Mono', monospace;
+      margin-bottom: 12px;
+    }
+    .widget-sub { font-size: .78rem; color: var(--subtext); margin-bottom: 10px; }
+
+    /* Progress bar */
+    .bar-track {
+      height: 6px; border-radius: 4px; background: var(--border); overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%; border-radius: 4px;
+      transition: width .8s cubic-bezier(.4,0,.2,1), background .3s;
+    }
+
+    /* Colors per widget */
+    .cpu  .widget-value, .cpu  .bar-fill { color: var(--cpu-color);  background: var(--cpu-color); }
+    .ram  .widget-value, .ram  .bar-fill { color: var(--ram-color);  background: var(--ram-color); }
+    .disk .widget-value, .disk .bar-fill { color: var(--disk-color); background: var(--disk-color); }
+
+    /* ── Charts section ── */
+    .charts {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 16px; margin-bottom: 24px;
+    }
+    .chart-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 20px 14px;
+      box-shadow: var(--shadow);
+    }
+    .chart-title { font-size: .85rem; font-weight: 600; margin-bottom: 14px; color: var(--subtext); text-transform: uppercase; letter-spacing: .7px; }
+    .chart-card canvas { max-height: 160px; }
+
+    /* ── Process table ── */
+    .table-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      box-shadow: var(--shadow);
+    }
+    .table-title { font-size: .9rem; font-weight: 700; margin-bottom: 16px; }
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .7px; color: var(--subtext); padding: 0 8px 10px; border-bottom: 1px solid var(--border); }
+    td { padding: 10px 8px; font-size: .85rem; border-bottom: 1px solid var(--border); }
+    tr:last-child td { border-bottom: none; }
+    td.pid { font-family: 'JetBrains Mono', monospace; color: var(--subtext); font-size: .78rem; }
+    td.ram-mb { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--ram-color); }
+    .kill-btn {
+      background: rgba(248,81,73,.15);
+      border: 1px solid rgba(248,81,73,.4);
+      color: var(--red); border-radius: 6px;
+      padding: 4px 12px; cursor: pointer; font-size: .78rem; font-weight: 600;
+      transition: background .2s, transform .15s;
+    }
+    .kill-btn:hover { background: rgba(248,81,73,.3); transform: scale(1.05); }
+    .kill-btn:active { transform: scale(.97); }
+
+    /* ── Alert popup ── */
+    #cpu-alert {
+      display: none; position: fixed; top: 80px; right: 20px;
+      background: rgba(248,81,73,.95); color: #fff;
+      border-radius: 10px; padding: 14px 18px;
+      max-width: 320px; font-size: .85rem; font-weight: 500;
+      box-shadow: 0 8px 32px rgba(248,81,73,.5);
+      animation: slideIn .3s ease;
+      z-index: 999;
+    }
+    #cpu-alert.show { display: flex; align-items: center; gap: 10px; }
+    #alert-close { margin-left: auto; cursor: pointer; font-size: 1.1rem; background: none; border: none; color: #fff; }
+    @keyframes slideIn { from{opacity:0;transform:translateX(40px)} to{opacity:1;transform:translateX(0)} }
+
+    /* ── Responsive ── */
+    @media(max-width:600px) {
+      .gauges { grid-template-columns: 1fr; }
+      .charts  { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+  <div class="logo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
+      <polyline points="7 10 10 13 13 10 17 14"/>
+    </svg>
+    <h1>PC Monitor</h1>
+  </div>
+  <div class="header-right">
+    <span id="status-dot" title="Aggiornamento live"></span>
+    <span id="last-update">--:--:--</span>
+    <button id="theme-btn" title="Cambia tema">🌙</button>
+  </div>
+</header>
+
+<!-- CPU Alert -->
+<div id="cpu-alert">
+  ⚠️ <span id="alert-msg">CPU oltre 80% da più di 10 secondi!</span>
+  <button id="alert-close" aria-label="Chiudi">✕</button>
+</div>
+
+<main>
+  <!-- Gauge Widgets -->
+  <section class="gauges" aria-label="Metriche di sistema">
+
+    <div class="widget cpu" id="widget-cpu">
+      <div class="widget-header">
+        <span class="widget-label">CPU</span>
+        <span class="widget-icon">⚡</span>
+      </div>
+      <div class="widget-value" id="cpu-val">--<span style="font-size:1.4rem">%</span></div>
+      <div class="widget-sub" id="cpu-sub">Carico processore</div>
+      <div class="bar-track"><div class="bar-fill" id="cpu-bar" style="width:0%"></div></div>
+    </div>
+
+    <div class="widget ram" id="widget-ram">
+      <div class="widget-header">
+        <span class="widget-label">RAM</span>
+        <span class="widget-icon">🧠</span>
+      </div>
+      <div class="widget-value" id="ram-val">--<span style="font-size:1.4rem">%</span></div>
+      <div class="widget-sub" id="ram-sub">Memoria principale</div>
+      <div class="bar-track"><div class="bar-fill" id="ram-bar" style="width:0%"></div></div>
+    </div>
+
+    <div class="widget disk" id="widget-disk">
+      <div class="widget-header">
+        <span class="widget-label">Disco</span>
+        <span class="widget-icon">💾</span>
+      </div>
+      <div class="widget-value" id="disk-val">--<span style="font-size:1.4rem">%</span></div>
+      <div class="widget-sub" id="disk-sub">Spazio su disco</div>
+      <div class="bar-track"><div class="bar-fill" id="disk-bar" style="width:0%"></div></div>
+    </div>
+
+  </section>
+
+  <!-- Charts -->
+  <section class="charts" aria-label="Grafici storici">
+    <div class="chart-card">
+      <div class="chart-title">CPU %</div>
+      <canvas id="chart-cpu"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">RAM %</div>
+      <canvas id="chart-ram"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Disco %</div>
+      <canvas id="chart-disk"></canvas>
+    </div>
+  </section>
+
+  <!-- Process Table -->
+  <section class="table-card" aria-label="Processi attivi">
+    <div class="table-title">🔝 Top 5 Processi per RAM</div>
+    <table id="proc-table">
+      <thead>
+        <tr>
+          <th>PID</th>
+          <th>Nome processo</th>
+          <th>RAM (MB)</th>
+          <th>Azione</th>
+        </tr>
+      </thead>
+      <tbody id="proc-body">
+        <tr><td colspan="4" style="color:var(--subtext);text-align:center;padding:20px">Caricamento...</td></tr>
+      </tbody>
+    </table>
+  </section>
+</main>
+
+<script>
+// ── Config ───────────────────────────────────────────────────────────────────
+const API_URL       = '/api/status';
+const KILL_URL      = '/api/kill/';
+const POLL_MS       = 1000;       // fetch ogni secondo
+const MAX_POINTS    = 60;         // 60 punti nel grafico (1 min)
+const CPU_ALERT_THR = 80;         // soglia alert %
+const CPU_ALERT_SEC = 10;         // secondi sopra soglia prima dell'alert
+
+// ── State ────────────────────────────────────────────────────────────────────
+let cpuHighSince = null;
+let alertShown   = false;
+
+// ── Chart factory ────────────────────────────────────────────────────────────
+function makeChart(id, color, label) {
+  const ctx = document.getElementById(id).getContext('2d');
+  const data = { labels: [], datasets: [{ label, data: [], borderColor: color,
+    backgroundColor: color + '22', fill: true, tension: .4, pointRadius: 0,
+    borderWidth: 2 }] };
+  return new Chart(ctx, {
+    type: 'line', data,
+    options: {
+      responsive: true, maintainAspectRatio: true, animation: false,
+      scales: {
+        x: { display: false },
+        y: { min: 0, max: 100,
+          ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--subtext').trim(), font: { size: 10 }, callback: v => v + '%' },
+          grid: { color: 'rgba(255,255,255,.05)' }
+        }
+      },
+      plugins: { legend: { display: false }, tooltip: {
+        callbacks: { label: ctx => ctx.parsed.y.toFixed(1) + '%' }
+      }}
+    }
+  });
+}
+
+const chartCpu  = makeChart('chart-cpu',  '#58a6ff', 'CPU');
+const chartRam  = makeChart('chart-ram',  '#3fb950', 'RAM');
+const chartDisk = makeChart('chart-disk', '#d29922', 'Disco');
+
+function pushPoint(chart, pct) {
+  const now = new Date().toLocaleTimeString('it-IT');
+  chart.data.labels.push(now);
+  chart.data.datasets[0].data.push(pct);
+  if (chart.data.labels.length > MAX_POINTS) {
+    chart.data.labels.shift();
+    chart.data.datasets[0].data.shift();
+  }
+  chart.update('none');
+}
+
+// ── DOM refs ─────────────────────────────────────────────────────────────────
+const elCpuVal   = document.getElementById('cpu-val');
+const elCpuSub   = document.getElementById('cpu-sub');
+const elCpuBar   = document.getElementById('cpu-bar');
+const elRamVal   = document.getElementById('ram-val');
+const elRamSub   = document.getElementById('ram-sub');
+const elRamBar   = document.getElementById('ram-bar');
+const elDiskVal  = document.getElementById('disk-val');
+const elDiskSub  = document.getElementById('disk-sub');
+const elDiskBar  = document.getElementById('disk-bar');
+const elProcBody = document.getElementById('proc-body');
+const elUpdate   = document.getElementById('last-update');
+const elAlert    = document.getElementById('cpu-alert');
+
+// ── Utils ────────────────────────────────────────────────────────────────────
+const MB = v => (v >= 1024 ? (v/1024).toFixed(1) + ' GB' : v + ' MB');
+const pct = (used, total) => total > 0 ? Math.round(used / total * 100) : 0;
+
+function setBar(el, pct) {
+  el.style.width = pct + '%';
+  el.style.background = pct >= 90 ? 'var(--red)' : pct >= 75 ? 'var(--yellow)' : null;
+}
+
+// ── Alert logic ───────────────────────────────────────────────────────────────
+function checkCpuAlert(cpu) {
+  if (cpu > CPU_ALERT_THR) {
+    if (!cpuHighSince) cpuHighSince = Date.now();
+    const elapsed = (Date.now() - cpuHighSince) / 1000;
+    if (elapsed >= CPU_ALERT_SEC && !alertShown) {
+      elAlert.classList.add('show');
+      alertShown = true;
+      if (Notification.permission === 'granted') {
+        new Notification('⚠️ PC Monitor — CPU alta!', { body: `CPU al ${cpu}% da oltre ${CPU_ALERT_SEC}s` });
+      }
+    }
+  } else {
+    cpuHighSince = null;
+    alertShown   = false;
+    elAlert.classList.remove('show');
+  }
+}
+
+document.getElementById('alert-close').onclick = () => {
+  elAlert.classList.remove('show');
+  alertShown = true; // non ri-mostrare finché non scende e risale
+};
+
+// ── Fetch & render ────────────────────────────────────────────────────────────
+async function fetchAndRender() {
+  try {
+    const res  = await fetch(API_URL);
+    if (!res.ok) throw new Error(res.status);
+    const d    = await res.json();
+
+    // CPU
+    const cpuPct = Math.round(d.cpuLoad);
+    elCpuVal.innerHTML = `${cpuPct}<span style="font-size:1.4rem">%</span>`;
+    elCpuSub.textContent = 'Carico processore';
+    setBar(elCpuBar, cpuPct);
+    pushPoint(chartCpu, d.cpuLoad);
+    checkCpuAlert(d.cpuLoad);
+
+    // RAM
+    const ramPct = pct(d.ramUsed, d.ramTotal);
+    elRamVal.innerHTML = `${ramPct}<span style="font-size:1.4rem">%</span>`;
+    elRamSub.textContent = `Usata: ${MB(d.ramUsed)} / Totale: ${MB(d.ramTotal)} — Libera: ${MB(d.ramFree)}`;
+    setBar(elRamBar, ramPct);
+    pushPoint(chartRam, ramPct);
+
+    // Disco
+    const diskPct = pct(d.diskUsed, d.diskTotal);
+    elDiskVal.innerHTML = `${diskPct}<span style="font-size:1.4rem">%</span>`;
+    elDiskSub.textContent = `Usato: ${MB(d.diskUsed)} / Totale: ${MB(d.diskTotal)} — Libero: ${MB(d.diskFree)}`;
+    setBar(elDiskBar, diskPct);
+    pushPoint(chartDisk, diskPct);
+
+    // Processi
+    if (d.topProcesses && d.topProcesses.length) {
+      elProcBody.innerHTML = d.topProcesses.map(p => `
+        <tr>
+          <td class="pid">${p.pid}</td>
+          <td>${p.name}</td>
+          <td class="ram-mb">${p.ramUsedMb}</td>
+          <td><button class="kill-btn" id="kill-${p.pid}" onclick="killProcess(${p.pid}, this)">Termina</button></td>
+        </tr>`).join('');
+    }
+
+    elUpdate.textContent = new Date().toLocaleTimeString('it-IT');
+
+  } catch(e) {
+    console.error('Fetch fallita:', e);
+    elUpdate.textContent = 'Errore connessione';
+  }
+}
+
+// ── Kill process ──────────────────────────────────────────────────────────────
+async function killProcess(pid, btn) {
+  if (!confirm(`Terminare il processo PID ${pid}?`)) return;
+  btn.disabled = true;
+  btn.textContent = '...';
+  try {
+    const res  = await fetch(KILL_URL + pid, { method: 'POST' });
+    const data = await res.json();
+    if (data.success) {
+      btn.textContent = '✓';
+      btn.style.color = 'var(--green)';
+    } else {
+      alert('Errore: ' + data.message);
+      btn.disabled = false;
+      btn.textContent = 'Termina';
+    }
+  } catch(e) {
+    alert('Errore di rete: ' + e.message);
+    btn.disabled = false;
+    btn.textContent = 'Termina';
+  }
+}
+
+// ── Theme toggle ──────────────────────────────────────────────────────────────
+const themeBtn = document.getElementById('theme-btn');
+themeBtn.onclick = () => {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  themeBtn.textContent = isDark ? '🌙' : '☀️';
+  // Aggiorna colore griglia grafici
+  [chartCpu, chartRam, chartDisk].forEach(c => {
+    c.options.scales.y.grid.color = isDark ? 'rgba(0,0,0,.08)' : 'rgba(255,255,255,.05)';
+    c.update('none');
+  });
+};
+
+// ── Notification permission ───────────────────────────────────────────────────
+if ('Notification' in window && Notification.permission === 'default') {
+  Notification.requestPermission();
+}
+
+// ── Start polling ─────────────────────────────────────────────────────────────
+fetchAndRender();
+setInterval(fetchAndRender, POLL_MS);
+</script>
+</body>
+</html>
